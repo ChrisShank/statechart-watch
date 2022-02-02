@@ -271,6 +271,7 @@ a {
   }
 
   &__face-background {
+    // This is broken because we are importing the svgs as images :/
     &[data-state-light='on'] {
       & #status-icons {
         fill: #c0bdb5;

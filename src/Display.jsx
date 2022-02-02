@@ -203,7 +203,7 @@ const ModeUpdateDisplay = function ModeUpdateDisplay({ state, updateState }) {
 const UpdateDisplay = function UpdateDisplay({ state }) {
   const states = ['sec', '1min', '10min', 'hr', 'mon', 'date', 'day', 'year', 'mode'].reduce(
     (result, key) => {
-      result[key] = `alive.main.displays.regularAndBeep.regular.update.${key}`;
+      result[key] = `alive.main.displays.update.${key}`;
       return result;
     },
     {}
@@ -293,24 +293,6 @@ const ChimeDisplay = function ChimeDisplay({ state }) {
   );
 };
 
-const Regular = function Regular({ state }) {
-  const states = {
-    time: 'alive.main.displays.regularAndBeep.regular.time',
-    date: 'alive.main.displays.regularAndBeep.regular.date',
-    update: 'alive.main.displays.regularAndBeep.regular.update',
-  };
-
-  const currentState = Object.keys(states).find((key) => state.matches(states[key]));
-
-  const displays = {
-    time: <TimeDisplay state={state} />,
-    date: <DateDisplay state={state} />,
-    update: <UpdateDisplay state={state} />,
-  };
-
-  return displays[currentState] || displays.time;
-};
-
 const Out = function Out({ state }) {
   const states = {
     alarm1: 'alive.main.displays.out.alarm-1',
@@ -372,15 +354,11 @@ const Stopwatch = function Stopwatch({ state }) {
   );
 };
 
-const Displays = {
-  Regular,
-  Out,
-  Stopwatch,
-};
-
 const Display = function Display({ state }) {
   const states = {
-    regular: 'alive.main.displays.regularAndBeep.regular',
+    time: 'alive.main.displays.time',
+    date: 'alive.main.displays.date',
+    update: 'alive.main.displays.update',
     wait: 'alive.main.displays.wait',
     out: 'alive.main.displays.out',
     stopwatch: 'alive.main.displays.stopwatch',
@@ -389,12 +367,14 @@ const Display = function Display({ state }) {
   const currentState = Object.keys(states).find((key) => state.matches(states[key]));
 
   const displays = {
-    regular: <Displays.Regular state={state} />,
-    out: <Displays.Out state={state} />,
-    stopwatch: <Displays.Stopwatch state={state} />,
+    time: <TimeDisplay state={state} />,
+    date: <DateDisplay state={state} />,
+    update: <UpdateDisplay state={state} />,
+    out: <Out state={state} />,
+    stopwatch: <Stopwatch state={state} />,
   };
 
-  return displays[currentState] || displays.regular;
+  return displays[currentState] || displays.time;
 };
 
 export default Display;

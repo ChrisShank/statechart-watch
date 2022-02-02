@@ -2,7 +2,7 @@ import cn from './classNames';
 
 const BeepLabel = function BeepLabel({ state }) {
   const beepStates = [
-    'alive.main.displays.regularAndBeep.beep-test.beep',
+    'alive.beep-test.on.beep',
     'alive.main.alarms-beep',
     'alive.chime-status.enabled.beep',
   ];

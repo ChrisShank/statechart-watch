@@ -1,5 +1,5 @@
 import { createMachine, actions } from 'xstate';
-const { assign, send, pure } = actions;
+const { assign, send, pure, raise } = actions;
 
 const seconds = function seconds(num) {
   return num * 1000;
@@ -235,6 +235,64 @@ const watchMachine = createMachine(
           },
         ],
         states: {
+          'beep-test': {
+            initial: 'off',
+            states: {
+              on: {
+                initial: '00',
+                states: {
+                  '00': {
+                    on: {
+                      B_PRESSED: {
+                        target: '10',
+                      },
+                      D_PRESSED: {
+                        target: '01',
+                      },
+                    },
+                  },
+                  10: {
+                    on: {
+                      B_RELEASED: {
+                        target: '00',
+                      },
+                      D_PRESSED: {
+                        target: 'beep',
+                      },
+                    },
+                  },
+                  '01': {
+                    on: {
+                      D_RELEASED: {
+                        target: '00',
+                      },
+                      B_PRESSED: {
+                        target: 'beep',
+                      },
+                    },
+                  },
+                  beep: {
+                    on: {
+                      B_RELEASED: {
+                        target: '01',
+                      },
+                      D_RELEASED: {
+                        target: '10',
+                      },
+                    },
+                  },
+                },
+                on: {
+                  REQUEST_BEEP_TEST_OFF: 'off',
+                },
+              },
+              off: {
+                on: {
+                  REQUEST_BEEP_TEST_ON: 'on',
+                },
+              },
+            },
+          },
           'alarm-1-status': {
             initial: 'disabled',
             states: {
@@ -356,211 +414,160 @@ const watchMachine = createMachine(
             initial: 'displays',
             states: {
               displays: {
-                initial: 'regularAndBeep',
+                initial: 'time',
                 states: {
                   hist: {
                     type: 'history',
                     history: 'deep',
                   },
-                  regularAndBeep: {
-                    type: 'parallel',
+                  time: {
+                    id: 'time',
+                    entry: raise('REQUEST_BEEP_TEST_ON'),
+                    on: {
+                      A_PRESSED: {
+                        target: '#alarm-1',
+                      },
+                      C_PRESSED: {
+                        target: 'wait',
+                      },
+                      D_PRESSED: {
+                        target: 'date',
+                      },
+                    },
+                  },
+                  date: {
+                    entry: raise('REQUEST_BEEP_TEST_ON'),
+                    after: {
+                      IDLENESS_DELAY: {
+                        target: 'time',
+                      },
+                    },
+                    on: {
+                      D_PRESSED: {
+                        target: 'time',
+                      },
+                    },
+                  },
+                  update: {
+                    entry: raise('REQUEST_BEEP_TEST_ON'),
+                    invoke: {
+                      id: 'idlenessTimer',
+                      src: 'idlenessTimer',
+                    },
+                    initial: 'sec',
                     states: {
-                      regular: {
-                        initial: 'time',
-                        states: {
-                          time: {
-                            id: 'time',
-                            on: {
-                              A_PRESSED: {
-                                target: '#alarm-1',
-                              },
-                              C_PRESSED: {
-                                target: '#wait',
-                              },
-                              D_PRESSED: {
-                                target: 'date',
-                              },
-                            },
+                      sec: {
+                        id: 'sec',
+                        on: {
+                          C_PRESSED: {
+                            target: '1min',
+                            actions: ['resetIdlenessTimer'],
                           },
-                          date: {
-                            after: {
-                              IDLENESS_DELAY: {
-                                target: 'time',
-                              },
-                            },
-                            on: {
-                              D_PRESSED: {
-                                target: 'time',
-                              },
-                            },
-                          },
-                          update: {
-                            initial: 'sec',
-                            invoke: {
-                              id: 'idlenessTimer',
-                              src: 'idlenessTimer',
-                            },
-                            states: {
-                              sec: {
-                                id: 'sec',
-                                on: {
-                                  C_PRESSED: {
-                                    target: '1min',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTByOneSec', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              '1min': {
-                                on: {
-                                  C_PRESSED: {
-                                    target: '10min',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTByOneMin', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              '10min': {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'hr',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTByTenMin', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              hr: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'mon',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTByOneHour', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              mon: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'date',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTMonth', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              date: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'day',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTDate', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              day: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'year',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTDay', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              year: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: 'mode',
-                                    actions: ['resetIdlenessTimer'],
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['incrementTYear', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                              mode: {
-                                on: {
-                                  C_PRESSED: {
-                                    target: '#time',
-                                  },
-                                  D_PRESSED: {
-                                    actions: ['toggleClockMode', 'resetIdlenessTimer'],
-                                  },
-                                },
-                              },
-                            },
-                            on: {
-                              B_PRESSED: {
-                                target: 'time',
-                              },
-                              IDLENESS_TIMER_EXPIRED: {
-                                target: 'time',
-                              },
-                            },
+                          D_PRESSED: {
+                            actions: ['incrementTByOneSec', 'resetIdlenessTimer'],
                           },
                         },
                       },
-                      'beep-test': {
-                        initial: '00',
-                        states: {
-                          '00': {
-                            on: {
-                              B_PRESSED: {
-                                target: '10',
-                              },
-                              D_PRESSED: {
-                                target: '01',
-                              },
-                            },
+                      '1min': {
+                        on: {
+                          C_PRESSED: {
+                            target: '10min',
+                            actions: ['resetIdlenessTimer'],
                           },
-                          10: {
-                            on: {
-                              B_RELEASED: {
-                                target: '00',
-                              },
-                              D_PRESSED: {
-                                target: 'beep',
-                              },
-                            },
-                          },
-                          '01': {
-                            on: {
-                              D_RELEASED: {
-                                target: '00',
-                              },
-                              B_PRESSED: {
-                                target: 'beep',
-                              },
-                            },
-                          },
-                          beep: {
-                            on: {
-                              B_RELEASED: {
-                                target: '01',
-                              },
-                              D_RELEASED: {
-                                target: '10',
-                              },
-                            },
+                          D_PRESSED: {
+                            actions: ['incrementTByOneMin', 'resetIdlenessTimer'],
                           },
                         },
+                      },
+                      '10min': {
+                        on: {
+                          C_PRESSED: {
+                            target: 'hr',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTByTenMin', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      hr: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'mon',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTByOneHour', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      mon: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'date',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTMonth', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      date: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'day',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTDate', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      day: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'year',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTDay', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      year: {
+                        on: {
+                          C_PRESSED: {
+                            target: 'mode',
+                            actions: ['resetIdlenessTimer'],
+                          },
+                          D_PRESSED: {
+                            actions: ['incrementTYear', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                      mode: {
+                        on: {
+                          C_PRESSED: {
+                            target: '#time',
+                          },
+                          D_PRESSED: {
+                            actions: ['toggleClockMode', 'resetIdlenessTimer'],
+                          },
+                        },
+                      },
+                    },
+                    on: {
+                      B_PRESSED: {
+                        target: 'time',
+                      },
+                      IDLENESS_TIMER_EXPIRED: {
+                        target: 'time',
                       },
                     },
                   },
                   wait: {
                     id: 'wait',
+                    entry: raise('REQUEST_BEEP_TEST_OFF'),
                     after: {
                       WAIT_DELAY: {
                         target: '#sec',
@@ -711,12 +718,13 @@ const watchMachine = createMachine(
                     },
                     on: {
                       IDLENESS_TIMER_EXPIRED: {
-                        target: 'regularAndBeep',
+                        target: 'time',
                       },
                     },
                   },
                   stopwatch: {
                     id: 'stopwatch',
+                    entry: raise('REQUEST_BEEP_TEST_OFF'),
                     initial: 'zero',
                     states: {
                       hist: {
@@ -805,7 +813,7 @@ const watchMachine = createMachine(
                     },
                     on: {
                       A_PRESSED: {
-                        target: 'regularAndBeep',
+                        target: 'time',
                       },
                     },
                   },

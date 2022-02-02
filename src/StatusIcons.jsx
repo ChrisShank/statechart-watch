@@ -1,10 +1,7 @@
 import React from 'react';
 import cn from './classNames';
 
-const timeDisplayStates = [
-  'alive.main.displays.regularAndBeep.regular.time',
-  'alive.main.displays.wait',
-];
+const timeDisplayStates = ['alive.main.displays.time', 'alive.main.displays.wait'];
 const alarmsBeepState = 'alive.main.alarms-beep';
 
 const AlarmStatus = function AlarmStatus({ state, alarmNumber, ...props }) {
