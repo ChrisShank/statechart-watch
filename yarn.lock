@@ -284,6 +284,13 @@
     react-refresh "^0.11.0"
     resolve "^1.20.0"
 
+"@xstate/inspect@^0.6.2":
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/@xstate/inspect/-/inspect-0.6.2.tgz#365f4784dece6e36b8fd1c00d419caf2ac353d2d"
+  integrity sha512-ZDJ0NETucV7wyT2Tyr3VeEgVD45TUGMTwbzmU2JfzUOjJQMyqn/XjcXGa3wxzgSvz2I0L4xC5ahRZN85j7oh1Q==
+  dependencies:
+    fast-safe-stringify "^2.0.7"
+
 "@xstate/react@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@xstate/react/-/react-2.0.0.tgz#fa1c950483a7a500d71faaa36e6970b337ba7543"
@@ -517,6 +524,11 @@ estree-walker@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/estree-walker/-/estree-walker-2.0.2.tgz#52f010178c2a4c117a7757cfe942adb7d2da4cac"
   integrity sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w==
+
+fast-safe-stringify@^2.0.7:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fast-safe-stringify/-/fast-safe-stringify-2.1.1.tgz#c406a83b6e70d9e35ce3b30a81141df30aeba884"
+  integrity sha512-W+KJc2dmILlPplD/H4K9l9LcAHAfPtP6BY84uVLXQ6Evcz9Lcg33Y2z1IVblT6xdY54PXYVHEv+0Wpq8Io6zkA==
 
 fill-range@^7.0.1:
   version "7.0.1"
